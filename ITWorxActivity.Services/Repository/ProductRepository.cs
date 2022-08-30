@@ -41,7 +41,7 @@ namespace ITWorxActivity.Services.Repository
         {
             try
             {
-                return _context.Products.Where(p => p.CategoryID == CategoryID).ToList();
+                return _context.Products.Where(p => p.CategoryID == CategoryID).ToList<Product>();
             }
             catch(Exception ex) { throw; }
         }
@@ -50,7 +50,7 @@ namespace ITWorxActivity.Services.Repository
         {
             try
             {
-                return _context.Products.ToList();
+                return _context.Products.ToList<Product>();
             }
             catch(Exception ex)
             {

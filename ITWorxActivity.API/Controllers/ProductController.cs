@@ -1,4 +1,5 @@
-﻿using ITWorxActivity.Entities;
+﻿using ITWorxActivity.API.Response;
+using ITWorxActivity.Entities;
 using ITWorxActivity.Services.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +21,43 @@ namespace ITWorxActivity.API.Controllers
             _repositroy = repository;
         }
         [HttpGet]
-        public IEnumerable<Product> GetProducts([FromQuery(Name = "categoryID")] string CategoryID)
+        public IActionResult GetProducts([FromQuery(Name = "categoryID")] string CategoryID)
         {
+            ProductResponse response;
+            IEnumerable<Product> allProducts;
             if (CategoryID != null)
             {
-                return _repositroy.GetProductByCategoryID(Convert.ToInt32(CategoryID));
+                allProducts = _repositroy.GetProductByCategoryID(Convert.ToInt32(CategoryID));
+
             }
             else
             {
-                return _repositroy.GetProducts();
+                 allProducts = _repositroy.GetProducts();
+                
+             }
+            if(allProducts != null)
+            {
+                response = new ProductResponse()
+                {
+                    Success = true,
+                    Message = "No Error Message",
+                    Products = allProducts
+                };
+                return Ok(response);
             }
+            else
+            {
+                response = new ProductResponse()
+                {
+                    Success = false,
+                    Message = "Your url is incorrect or you miss something"
+                };
+                return Ok(response);
+
+            }
+            
         }
+        
         [HttpGet("{ProductID}")]
         public Product GetProductByID(string ProductID)
         {
