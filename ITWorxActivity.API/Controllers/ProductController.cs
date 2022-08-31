@@ -1,6 +1,7 @@
 ﻿using ITWorxActivity.API.Response;
 using ITWorxActivity.Entities;
 using ITWorxActivity.Services.Contracts;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -13,6 +14,7 @@ namespace ITWorxActivity.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowOrigin")]
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _repositroy;
@@ -59,34 +61,91 @@ namespace ITWorxActivity.API.Controllers
         }
         
         [HttpGet("{ProductID}")]
-        public Product GetProductByID(string ProductID)
+        public IActionResult GetProductByID(string ProductID)
         {
-            return _repositroy.GeProductByID(Convert.ToInt32(ProductID));
+            var product = _repositroy.GeProductByID(Convert.ToInt32(ProductID));
+            List<Product> products = new List<Product>();
+            products.Add(product);
+            BaseResponse productResponse;
+            if (product != null)
+            {
+                productResponse = new ProductResponse
+                {
+                    Success = true,
+                    Message = "Everything is okay",
+                    Products = products
+                };
+
+                return Ok(productResponse);
+            }
+
+            else
+            {
+                productResponse = new BaseResponse
+                {
+                    Success = false,
+                    Message = $"there is not product with the following id : {ProductID} "
+                   
+                };
+
+
+                return NotFound(productResponse);
+            }
         }
         [HttpPost]
-        public async Task<Object> AddProduct([FromBody]Product product)
+        public async Task<IActionResult> AddProduct([FromBody]Product product)
         {
+            BaseResponse productResponse;
             try
             {
-                await _repositroy.AddProduct(product);
-                return true;
+                var obj = await _repositroy.AddProduct(product);
+                List<Product> products = new List<Product>();
+                products.Add(obj);
+                 productResponse = new ProductResponse
+                {
+                    Message = "product has been added",
+                    Success = true,
+                    Products = products
+                };
+                return Ok(productResponse);
             }
             catch
             {
-                return false;
+
+                productResponse = new BaseResponse()
+                {
+                    Message = "The product is not added successfully",
+                    Success = false
+                };
+                return NotFound(productResponse);
             }
         }
         [HttpPut("{ProductID}")]
-        public bool UpdateProduct([FromBody]Product product, string ProductID)
+        public async Task<IActionResult> UpdateProduct([FromBody]Product product, string ProductID)
         {
+            BaseResponse productResponse;
             try
             {
-                _repositroy.UpdateProduct(product, Convert.ToInt32(ProductID));
-                return true;
+                var obj = await _repositroy.UpdateProduct(product, Convert.ToInt32(ProductID));
+                List<Product> products = new List<Product>();
+                products.Add(obj);
+                productResponse = new ProductResponse()
+                {
+                    Message = $"the prodcut has been updated with ID : {ProductID}",
+                    Success = true,
+                    Products = products
+
+                };
+                return Ok(productResponse);
             }
             catch
             {
-                return false;
+                productResponse = new BaseResponse()
+                {
+                    Message = $"There is not product with the following ID:{ProductID}",
+                    Success = false
+                };
+                return NotFound(productResponse);
             }
 
         }

@@ -1,5 +1,7 @@
-﻿using ITWorxActivity.Entities;
+﻿using ITWorxActivity.API.Response;
+using ITWorxActivity.Entities;
 using ITWorxActivity.Services.Contracts;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +13,7 @@ namespace ITWorxActivity.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("AllowOrigin")]
     public class CategoryController : ControllerBase
     {
         private ICategoryRepository _repositroy;
@@ -19,10 +22,31 @@ namespace ITWorxActivity.API.Controllers
             _repositroy = categoryRepository;
         }
         [HttpGet]
-        public IEnumerable<Category> GetAll()
+        public IActionResult GetAll()
         {
             IEnumerable<Category> AllCategories = _repositroy.GetCategories();
-            return AllCategories;
+            BaseResponse categoryResponse;
+            try
+            {
+                categoryResponse = new CategoryResponse
+                {
+                    Success = true,
+                    Message = "There is no errors",
+                    Categories = AllCategories
+                };
+
+            return Ok(categoryResponse);
+
+            }
+            catch
+            {
+                categoryResponse = new BaseResponse()
+                {
+                    Message = "There is not categories",
+                    Success = false
+                };
+                return NotFound(categoryResponse);
+            }
         }
 
     }

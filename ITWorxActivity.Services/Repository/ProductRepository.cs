@@ -60,18 +60,23 @@ namespace ITWorxActivity.Services.Repository
 
         public async Task<Product> UpdateProduct(Product product,int ProductID)
         {
-            var obj = _context.Products.SingleOrDefault(p => p.ProductID == ProductID);
-            if(obj != null)
+            try
             {
-                obj.Name = product.Name;
-                obj.Price = product.Price;
-                obj.Qunatity = product.Qunatity;
-                obj.ImageURL = product.ImageURL;
-                obj.CategoryID = product.CategoryID;
-           await _context.SaveChangesAsync();
-            return obj;
+                var obj = _context.Products.SingleOrDefault(p => p.ProductID == ProductID);
+                
+                    obj.Name = product.Name;
+                    obj.Price = product.Price;
+                    obj.Qunatity = product.Qunatity;
+                    obj.ImageURL = product.ImageURL;
+                    obj.CategoryID = product.CategoryID;
+                    await _context.SaveChangesAsync();
+                    return obj;
+                
             }
-            return null;
+            catch(Exception ex)
+            {
+                throw;
+            }
         }
     }
 }
